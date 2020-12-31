@@ -36,6 +36,11 @@ use crate::timers::GbaTimer;
 use crate::render::palette::{NO_EFFECT, VCOUNT_SEQUENCE, VCOUNT_SEQUENCE_LEN, NO_COLORS, TEXTBOX_VCOUNTS};
 use core::ops::Range;
 
+enum Platform {
+    Hardware,
+    MGBA,
+}
+
 pub struct GbaRenderer {
     palette_normal_rom: &'static [Color],
     /// used for applying overlay/hardlight gradients every so many scanlines
@@ -54,6 +59,7 @@ pub struct GbaRenderer {
     frame_counter: u32,
     vcount_index: usize,
     perf_log: [u32; VCOUNT_SEQUENCE_LEN],
+    platform: Platform,
     // shadow_oam: ShadowOam,
 }
 
@@ -91,10 +97,14 @@ impl GbaRenderer {
             frame_counter: 0,
             vcount_index: 0,
             perf_log: [0; VCOUNT_SEQUENCE_LEN],
+            platform: Platform::Hardware,
         }
     }
 
     pub fn initialize(&mut self) {
+        if let Some(_) = gba::mgba::MGBADebug::new() {
+            self.platform = Platform::MGBA;
+        }
     }
 
     pub fn vblank(&mut self) {
@@ -113,7 +123,12 @@ impl GbaRenderer {
     pub fn vcounter(&mut self) {
         // TODO: hit every other vcount and only set up timer1 if we're supposed to do a thing?
         // fudging the numbers a bit on this 750, but i'm assuming there'll be ~50 cycles overhead
-        GbaTimer::setup_timer1_irq(750);
+        let cycles = match self.platform {
+            Platform::Hardware => 750,
+            // HACK: workaround for https://github.com/mgba-emu/mgba/issues/1996
+            Platform::MGBA => 50,
+        };
+        GbaTimer::setup_timer1_irq(cycles);
 
         let mut vcount = VCOUNT.read();
         if vcount >= VBLANK_SCANLINE /*- BLEND_RESOLUTION*/ as u16 {
