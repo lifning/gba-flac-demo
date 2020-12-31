@@ -27,8 +27,9 @@ use gba::io::display::{
     DisplayControlSetting, DisplayStatusSetting, MosaicSetting, DISPCNT, DISPSTAT, MOSAIC,
     VBLANK_SCANLINE, VCOUNT,
 };
-use gba::io::window::{InsideWindowSetting, WININ};
+use gba::io::window::{InsideWindowSetting, WININ, OutsideWindowSetting};
 use gba::palram::{PALRAM_BG, PALRAM_OBJ};
+use gba::oam::{ObjectAttributes, OBJAttr0, OBJAttr1, OBJAttr2, ObjectRender, ObjectMode, ObjectShape, ObjectSize};
 
 use flowergal_proj_config::resources::*;
 
@@ -36,7 +37,8 @@ use crate::timers::GbaTimer;
 use crate::render::palette::{NO_EFFECT, VCOUNT_SEQUENCE, VCOUNT_SEQUENCE_LEN, NO_COLORS, TEXTBOX_VCOUNTS};
 use core::ops::Range;
 
-enum Platform {
+#[derive(PartialEq)]
+pub enum Platform {
     Hardware,
     MGBA,
 }
@@ -59,7 +61,7 @@ pub struct GbaRenderer {
     frame_counter: u32,
     vcount_index: usize,
     perf_log: [u32; VCOUNT_SEQUENCE_LEN],
-    platform: Platform,
+    pub platform: Platform,
     // shadow_oam: ShadowOam,
 }
 
@@ -105,10 +107,73 @@ impl GbaRenderer {
         if let Some(_) = gba::mgba::MGBADebug::new() {
             self.platform = Platform::MGBA;
         }
+
+        // FIXME: crashes when we use ObjectSize::Three for some reason?
+        if self.platform != Platform::MGBA {
+            gba::io::window::WINOUT.write(OutsideWindowSetting::new()
+                .with_outside_bg0(true)
+                .with_outside_bg1(true)
+                .with_outside_bg2(true)
+                .with_outside_bg3(true)
+                .with_outside_color_special(true)
+                .with_obj_win_bg0(true)
+                .with_obj_win_bg1(true)
+                .with_obj_win_bg2(false)
+                .with_obj_win_bg3(true)
+                .with_obj_win_color_special(true)
+            );
+
+            let sprite_chars = unsafe {
+                let ptr = CHAR_BASE_BLOCKS.get(4).unwrap().to_usize() as *mut Tile4bpp;
+                core::slice::from_raw_parts_mut(ptr, 0x4000 / core::mem::size_of::<Tile4bpp>())
+            };
+            for char in sprite_chars {
+                char.0 = [
+                    0x10101010,
+                    0x01010101,
+                    0x10101010,
+                    0x01010101,
+                    0x10101010,
+                    0x01010101,
+                    0x10101010,
+                    0x01010101,
+                ];
+            }
+            PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff));
+            self.update_sprite_attributes();
+        }
+    }
+
+    fn update_sprite_attributes(&mut self) {
+        for x in 0..=2 {
+            for y in 0..=2 {
+                let shape = match y {
+                    2 => ObjectShape::Horizontal,
+                    _ => ObjectShape::Square,
+                };
+                let slot = (y * 3 + x) as usize;
+                gba::oam::write_obj_attributes(slot, ObjectAttributes {
+                    attr0: OBJAttr0::new()
+                        .with_row_coordinate(64 * y)
+                        .with_obj_rendering(ObjectRender::Normal)
+                        .with_obj_mode(ObjectMode::OBJWindow)
+                        .with_obj_shape(shape),
+                    attr1: OBJAttr1::new()
+                        .with_col_coordinate(64 * x + 24)
+                        .with_hflip(self.even_odd_frame())
+                        .with_obj_size(ObjectSize::Three),
+                    attr2: OBJAttr2::new()
+                        .with_tile_id(0)
+                        .with_priority(0)
+                        .with_palbank(0),
+                });
+            }
+        }
     }
 
     pub fn vblank(&mut self) {
         self.frame_counter += 1;
+        self.update_sprite_attributes();
     }
 
     pub fn even_odd_frame(&self) -> bool {
