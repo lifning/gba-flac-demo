@@ -1,0 +1,18 @@
+# See https://wiki.libsdl.org/SDL_Keycode for key names
+
+[general]
+fastforward = "Space"
+reset = "F9"
+fullscreen = "F10"
+
+[gba]
+a = "X"
+b = "Z"
+l = "A"
+r = "S"
+start = "Return"
+select = "Backspace"
+up = "Up"
+down = "Down"
+left = "Left"
+right = "Right"

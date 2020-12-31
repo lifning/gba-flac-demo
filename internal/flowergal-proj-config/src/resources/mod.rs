@@ -13,7 +13,7 @@ pub const ROOM_SIZE: (usize, usize) = (32, 32);
 pub const TEXT_TOP_ROW: isize = 13;
 pub const TEXT_BOTTOM_ROW: isize = TEXT_TOP_ROW + 4;
 
-pub const TEXTBOX_Y_START: u16 = TEXT_TOP_ROW as u16 * 8 + 2;
+pub const TEXTBOX_Y_START: u16 = TEXT_TOP_ROW as u16 * 8 + 1;
 pub const TEXTBOX_Y_END: u16 = TEXT_BOTTOM_ROW as u16 * 8 + 5;
 pub const TEXTBOX_Y_MID_EFFECT_INDEX: usize = (TEXTBOX_Y_START + 20) as usize / BLEND_RESOLUTION;
 

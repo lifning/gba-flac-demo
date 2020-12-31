@@ -6,11 +6,11 @@ rustflags = ["-Cinline-threshold=275"]
 target = "armv4t-none-eabi.json"
 
 [target.thumbv4t-none-eabi]
-runner = "mgba-qt -3 -C interframeBlending=1 --log-level 15"
+runner = "NanoboyAdvance.sh"
 rustflags = ["--emit=asm", "-Clink-arg=-Tlinker_script.ld"]
 
 [target.armv4t-none-eabi]
-runner = "mgba-qt -3 -C interframeBlending=1 --log-level 15"
+runner = "NanoboyAdvance.sh"
 rustflags = ["--emit=asm", "-Clink-arg=-Tlinker_script.ld"]
 
 # we might eventually... *eventually* target the DS too
