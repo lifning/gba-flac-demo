@@ -1,0 +1,119 @@
+From 9316ba84d773a6b168765d2698663c5ce38bfbc7 Mon Sep 17 00:00:00 2001
+From: pca006132 <john.lck40@gmail.com>
+Date: Tue, 13 Oct 2020 14:46:26 +0800
+Subject: [PATCH] Use weak linkage for aeabi memory functions
+
+---
+ src/arm.rs | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
+
+diff --git a/src/arm.rs b/src/arm.rs
+index 190bba7..3a25060 100644
+--- a/src/arm.rs
++++ b/src/arm.rs
+@@ -138,18 +138,20 @@ pub unsafe fn __aeabi_ldivmod() {
+     intrinsics::unreachable();
+ }
+ 
++// The following functions use weak linkage to allow users to override
++// with custom implementation.
+ // FIXME: The `*4` and `*8` variants should be defined as aliases.
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memcpy(dest: *mut u8, src: *const u8, n: usize) {
+     ::mem::memcpy(dest, src, n);
+ }
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memcpy4(dest: *mut u8, src: *const u8, mut n: usize) {
+     // We are guaranteed 4-alignment, so accessing at u32 is okay.
+     let mut dest = dest as *mut u32;
+@@ -167,35 +169,35 @@ pub unsafe extern "aapcs" fn __aeabi_memcpy4(dest: *mut u8, src: *const u8, mut
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memcpy8(dest: *mut u8, src: *const u8, n: usize) {
+     __aeabi_memcpy4(dest, src, n);
+ }
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memmove(dest: *mut u8, src: *const u8, n: usize) {
+     ::mem::memmove(dest, src, n);
+ }
+ 
+ #[cfg(not(any(target_os = "ios", target_env = "msvc")))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memmove4(dest: *mut u8, src: *const u8, n: usize) {
+     __aeabi_memmove(dest, src, n);
+ }
+ 
+ #[cfg(not(any(target_os = "ios", target_env = "msvc")))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memmove8(dest: *mut u8, src: *const u8, n: usize) {
+     __aeabi_memmove(dest, src, n);
+ }
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memset(dest: *mut u8, n: usize, c: i32) {
+     // Note the different argument order
+     ::mem::memset(dest, c, n);
+@@ -203,7 +205,7 @@ pub unsafe extern "aapcs" fn __aeabi_memset(dest: *mut u8, n: usize, c: i32) {
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memset4(dest: *mut u8, mut n: usize, c: i32) {
+     let mut dest = dest as *mut u32;
+ 
+@@ -221,28 +223,28 @@ pub unsafe extern "aapcs" fn __aeabi_memset4(dest: *mut u8, mut n: usize, c: i32
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memset8(dest: *mut u8, n: usize, c: i32) {
+     __aeabi_memset4(dest, n, c);
+ }
+ 
+ #[cfg(not(target_os = "ios"))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memclr(dest: *mut u8, n: usize) {
+     __aeabi_memset(dest, n, 0);
+ }
+ 
+ #[cfg(not(any(target_os = "ios", target_env = "msvc")))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memclr4(dest: *mut u8, n: usize) {
+     __aeabi_memset4(dest, n, 0);
+ }
+ 
+ #[cfg(not(any(target_os = "ios", target_env = "msvc")))]
+ #[cfg_attr(not(feature = "mangled-names"), no_mangle)]
+-#[cfg_attr(thumb, linkage = "weak")]
++#[linkage = "weak"]
+ pub unsafe extern "aapcs" fn __aeabi_memclr8(dest: *mut u8, n: usize) {
+     __aeabi_memset4(dest, n, 0);
+ }
