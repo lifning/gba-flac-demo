@@ -1,0 +1,47 @@
+fn _count_golomb_rice_quotient_asm(&mut self) -> i32 {
+    unsafe {
+        #[cfg(feature = "debug_bitbuffer")] debug!("before: bb {:32b} bbl {} ep {}", self.bitbuffer, self.bitbufferlen, self.encoded_position);
+        let mut quotient = 0;
+        asm!(
+        "mov {encpos}, {encpos}, lsl #2", // u32 slice index to byte offset
+        "cmp {bitbuf}, #0",
+        "moveq {quot}, {bitbuflen}",
+        "moveq {bitbuflen}, #0",
+        "sub {bitbuflen}, {bitbuflen}, #1", // when this overflows, it makes the lsl underflow
+        "mov {mask}, #1",
+        "movs {mask}, {mask}, lsl {bitbuflen}",
+        "add {bitbuflen}, {bitbuflen}, #1",
+        "b 2f",
+        "1:",
+        "movs {mask}, {mask}, lsr #1",
+        "2:",
+        // if mask hits 0, we need to replenish bitbuffer
+        "ldreq {bitbuf}, [{data}, {encpos}]", // load & endian swap
+        "addeq {encpos}, {encpos}, #4",
+        "eoreq {mask}, {bitbuf}, {bitbuf}, ror #16", // using {mask} as tmp 'cause we overwrite it anyway
+        "biceq {mask}, {mask}, #0xff, 16",
+        "moveq {bitbuf}, {bitbuf}, ror #8",
+        "eoreq {bitbuf}, {bitbuf}, {mask}, lsr #8",
+        "moveq {bitbuflen}, #32",
+        "moveq {mask}, #0x80000000",
+        // endif
+        "sub {bitbuflen}, #1",
+        "tst {bitbuf}, {mask}",
+        "addeq {quot}, #1",
+        "beq 1b",
+        "sub {mask}, {mask}, #1",
+        "and {bitbuf}, {bitbuf}, {mask}",
+        "mov {encpos}, {encpos}, lsr #2", // byte offset back to u32 slice index
+        quot = inout(reg) quotient,
+        bitbuf = inout(reg) self.bitbuffer,
+        bitbuflen = inout(reg) self.bitbufferlen,
+        data = inout(reg) self.data.as_ptr() => _,
+        encpos = inout(reg) self.encoded_position,
+        mask = out(reg) _,
+        options(nostack));
+
+        #[cfg(feature = "debug_bitbuffer")] debug!("after:  bb {:32b} bbl {} ep {} q {}", self.bitbuffer, self.bitbufferlen, self.encoded_position, quotient);
+
+        quotient
+    }
+}

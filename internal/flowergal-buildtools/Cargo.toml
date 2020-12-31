@@ -1,0 +1,27 @@
+[package]
+name = "flowergal-buildtools"
+version = "0.1.0"
+authors = ["lif <lifning+git@pm.me>"]
+edition = "2018"
+license = "AGPL-3.0"
+
+[dependencies]
+flowergal-proj-config = { path = "../flowergal-proj-config" }
+gba = { path = "../../external/gba" }
+gba-compression = { path = "../../external/gba-compression" }
+build_const = { version = "0.2" }
+cargo-about = "0.2.3"
+spdx = "0.3.4" # must match cargo-about's version
+textwrap = { version = "0.13", features = ["hyphenation"] }
+hyphenation = { version = "0.8",  features = ["embed_en-us"] } # must match textwrap's version
+regex = "1"
+rayon = "1"
+gen-iter = "0.2"
+tempfile = "3.1"
+
+serde = { version = "1", features = ["derive"] }
+
+# level layout
+sdl2 = { version = "0.34", features = ["image"] }
+
+[features]
