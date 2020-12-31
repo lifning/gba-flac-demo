@@ -58,7 +58,13 @@ impl Hud {
     }
 
     fn write_entry_alternating(&self, row: isize, col: isize, entry: TSE) {
-        self.write_entry(row, col, TextScreenblockEntry(entry.0 + self.odd_frame as u16))
+        // hack
+        let alternation = if col > 15 {
+            !self.odd_frame
+        } else {
+            self.odd_frame
+        } as u16;
+        self.write_entry(row, col, TextScreenblockEntry(entry.0 + alternation))
     }
 
     pub fn draw_background(&self) {

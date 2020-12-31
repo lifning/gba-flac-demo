@@ -24,8 +24,6 @@ use bstr::ByteSlice;
 use heapless::consts::U80;
 
 use flowergal_runtime::Driver;
-use gba::vram::{CHAR_BASE_BLOCKS, Tile4bpp};
-use gba::palram::PALRAM_OBJ;
 use flowergal_proj_config::sound_info::{SAMPLE_RATE, CYCLES_PER_FRAME};
 
 static mut G_HUD: Option<hud::Hud> = None;
@@ -78,19 +76,6 @@ fn main() -> ! {
 
     let mut text_showing = true;
     driver.video().set_textbox_shown(text_showing);
-
-    let sprite_char = CHAR_BASE_BLOCKS.get(4).unwrap().to_usize() as *mut Tile4bpp;
-    unsafe { *sprite_char }.0 = [
-        0x10101010,
-        0x01010101,
-        0x10101010,
-        0x01010101,
-        0x10101010,
-        0x01010101,
-        0x10101010,
-        0x01010101,
-    ];
-    PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff));
 
     let mut prev_keys = KeyInput::new();
     loop {
