@@ -30,7 +30,6 @@ use gba::io::display::{
 use gba::io::window::{InsideWindowSetting, WININ};
 use gba::palram::{PALRAM_BG, PALRAM_OBJ};
 
-use flowergal_proj_config::resources::blend::fixed::*;
 use flowergal_proj_config::resources::*;
 
 use crate::timers::GbaTimer;
