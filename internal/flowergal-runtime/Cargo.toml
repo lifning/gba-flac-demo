@@ -6,9 +6,6 @@ edition = "2018"
 license = "BSD-3-Clause AND MIT"
 # license-file = "COPYING"
 
-[build-dependencies]
-cc = "1.0"
-
 [dependencies]
 flowergal-proj-config = { path = "../flowergal-proj-config" }
 gba = { path = "../../external/gba" }
