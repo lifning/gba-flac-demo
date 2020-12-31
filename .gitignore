@@ -1,1 +1,5 @@
-/target
+target
+/Cargo.lock
+/.idea
+/assets/mp3/*
+decomp.wav

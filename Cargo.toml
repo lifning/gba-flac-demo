@@ -1,10 +1,57 @@
 [package]
-name = "gba-demo"
+name = "flac-demo"
 version = "0.1.0"
 authors = ["lifning"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace]
+
+[profile.release]
+lto = true
+# we prob don't want "z" because that turns off loop vectorization (`stmia`, right?)
+# 3 might not account for slow ROM accesses generally meaning more code = slower
+opt-level = 3
+panic = "abort"
+incremental = false
+codegen-units = 1
+overflow-checks = false
+
+[profile.dev]
+opt-level = 2
+overflow-checks = false
+
+[profile.dev.package."*"]
+opt-level = 3
+incremental = false
+codegen-units = 1
+
+# work around rustc hanging issue
+[profile.dev.package.fixed]
+debug = 0
+debug-assertions = false
+overflow-checks = false
+
+#[package.metadata.cargo-xbuild]
+#memcpy = false
+
+[build-dependencies]
+bindgen = "^0.53"
+flowergal-buildtools = { path = "internal/flowergal-buildtools" }
 
 [dependencies]
-gba = { path = "../gba" }
+gba = { path = "external/gba" }
+voladdress = "0.2"  # version must match gba's
+flowergal-runtime = { path = "internal/flowergal-runtime" }
+flowergal-proj-config = { path = "internal/flowergal-proj-config" }
+flowergal-proj-assets = { path = "internal/flowergal-proj-assets" }
+fixed = { version = "1", default-features = false }
+heapless = { version = "0.5", default-features = false }
+bstr = { version = "0.2", default-features = false }
+
+[features]
+bench_audio = [ "flowergal-runtime/bench_audio" ]
+bench_video = [ "flowergal-runtime/bench_video" ]
+bench_flac = [ "flowergal-runtime/bench_flac" ]
+verify_asm = [ "flowergal-runtime/verify_asm" ]
+debug_bitbuffer = [ "flowergal-runtime/debug_bitbuffer" ]
+supercard = [ "flowergal-runtime/supercard" ]

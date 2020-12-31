@@ -1,0 +1,12 @@
+[submodule "external/gba"]
+	path = external/gba
+	url = https://github.com/lifning/gba
+[submodule "gba-compression"]
+	path = external/gba-compression
+	url = https://github.com/lifning/gba-compression
+[submodule "external/lossywav"]
+	path = external/lossywav
+	url = https://github.com/lifning/lossywav
+[submodule "external/flac"]
+	path = external/flac
+	url = https://github.com/lifning/flac

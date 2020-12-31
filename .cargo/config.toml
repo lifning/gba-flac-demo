@@ -1,0 +1,24 @@
+[target.release]
+rustflags = ["-Cinline-threshold=275"]
+
+[build]
+#target = "thumbv4t-none-eabi"
+target = "armv4t-none-eabi.json"
+
+[target.thumbv4t-none-eabi]
+runner = "mgba-qt -3 -C interframeBlending=1 --log-level 15"
+rustflags = ["--emit=asm", "-Clink-arg=-Tlinker_script.ld"]
+
+[target.armv4t-none-eabi]
+runner = "mgba-qt -3 -C interframeBlending=1 --log-level 15"
+rustflags = ["--emit=asm", "-Clink-arg=-Tlinker_script.ld"]
+
+# we might eventually... *eventually* target the DS too
+[target.armv5te-none-eabi]
+rustflags = ["--emit=asm", "-Clink-arg=-Tlinker_script.ld"]
+
+[unstable]
+build-std = ["core", "compiler_builtins"]
+build-std-features = ["compiler-builtins-mem", "backtrace"]
+# prevent dev-dependencies' feature settings polluting the target dependencies
+features = ["host_dep", "build_dep"]
