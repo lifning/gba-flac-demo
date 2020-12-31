@@ -5,8 +5,6 @@ pub use gba::Color;
 
 use crate::sound_info::TrackList;
 use crate::WorldId;
-use fixed::types::extra::U6;
-use fixed::FixedU16;
 
 pub mod blend;
 
@@ -24,26 +22,6 @@ pub const TEXTBOX_R: u16 = 42;
 pub const TEXTBOX_G: u16 = 42;
 pub const TEXTBOX_B: u16 = 69;
 pub const TEXTBOX_A: u16 = 141;
-
-// TODO: remove
-pub fn compute_textbox_blend(c_norm: Color) -> Color {
-    // textbox semi-opaque color's rgba8888 is (42, 44, 53, 204)
-    const TEXTBOX_COLOR_PRECOMPUTED_ALPHA: (FixedU16<U6>, FixedU16<U6>, FixedU16<U6>) = (
-        FixedU16::from_bits((TEXTBOX_R * TEXTBOX_A) / (255 >> 3)),
-        FixedU16::from_bits((TEXTBOX_G * TEXTBOX_A) / (255 >> 3)),
-        FixedU16::from_bits((TEXTBOX_B * TEXTBOX_A) / (255 >> 3)),
-    );
-
-    // we only need 1 minus alpha for our equation. 204/255 = 80%, by the way.
-    const TEXTBOX_INV_ALPHA: FixedU16<U6> =
-        FixedU16::from_bits(((255 - TEXTBOX_A) << 3) / (255 >> 3));
-
-    blend::fixed::blend_precomputed_alpha(
-        c_norm,
-        TEXTBOX_COLOR_PRECOMPUTED_ALPHA,
-        TEXTBOX_INV_ALPHA,
-    )
-}
 
 /// resolution of palette effects (not every scanline for memory and cpu's sake)
 /// must be a power of 2 for ARMv4's sake (CPU long division during hblank is a bad plan)

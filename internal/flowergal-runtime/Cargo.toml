@@ -12,7 +12,6 @@ cc = "1.0"
 [dependencies]
 flowergal-proj-config = { path = "../flowergal-proj-config" }
 gba = { path = "../../external/gba" }
-fixed = { version = "1", default-features = false }
 heapless = { version = "0.5", default-features = false }
 
 [features]
