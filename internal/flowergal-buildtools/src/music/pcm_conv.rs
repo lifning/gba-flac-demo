@@ -22,7 +22,7 @@ pub fn convert_songs_and_sfx() -> Result<(), Box<dyn Error>> {
     }
 
     Command::new("youtube-dl")
-        .args(&["--download-archive", "downloaded-ids.txt", "32ZTjFW2RYo"])
+        .args(&["--ignore-config", "--download-archive", "downloaded-ids.txt", "32ZTjFW2RYo"])
         .current_dir(Path::new(MP3_DIR))
         .output()?;
 
