@@ -27,4 +27,7 @@ make
 
 ## Acknowledgements
 Thanks to Lokathor & other contributors to rust-console/gba.
+
 Thanks to Nayuki for the accessible example of FLAC decoding.
+
+Thanks to Leonarth for the VBA-detection trick.
