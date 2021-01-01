@@ -19,6 +19,8 @@ use flowergal_proj_assets::MUSIC_DATA;
 use gba::io::color_blend::{
     AlphaBlendingSetting, ColorEffectSetting, ColorSpecialEffect, BLDALPHA, BLDCNT,
 };
+use flowergal_runtime::render::Platform;
+use gba::io::window::OutsideWindowSetting;
 
 const WORLD_CHARBLOCK_ID: u16 = 0;
 const WORLD_CHARBLOCK_SPECIAL_ID: u16 = 1;
@@ -402,21 +404,68 @@ impl World {
                     angle,
                 };
                 gba::bios::bg_affine_set(&params, 0x400_0020usize, 1);
+
                 let x = (512 - (self.frame_count & 1023)).abs() as u16;
                 BG1HOFS.write(x);
 
-                let bg1_settings = BG1CNT.read();
                 let alpha = (32 - ((self.frame_count >> 3) & 63)).abs() as u16;
-                if alpha < 16 {
-                    BG1CNT.write(bg1_settings.with_char_base_block(WORLD_CHARBLOCK_ID))
-                } else {
-                    BG1CNT.write(bg1_settings.with_char_base_block(WORLD_CHARBLOCK_ID))
+                let renderer = unsafe { Driver::instance_mut().video() };
+                let platform = &renderer.platform;
+                match platform {
+                    // crashes when we use sprites... see comment in render/mod.rs
+                    Platform::MGBA => {
+                        BLDALPHA.write(
+                            AlphaBlendingSetting::new()
+                                .with_eva_coefficient(16 - (alpha >> 1))
+                                .with_evb_coefficient(alpha >> 1),
+                        );
+                    }
+                    _ => {
+                        // HACK: don't alternate meshes
+                        if self.frame_count & 511 == 256+127 {
+                            renderer.frame_counter -= 1;
+                        }
+
+                        if self.frame_count & 511 == 135 {
+                            renderer.frame_counter += 1;
+                        }
+                        // when bg2 (affine) is not fully opaque
+                        if alpha != 32 {
+                            if alpha < 16 {
+                                gba::io::window::WINOUT.write(OutsideWindowSetting::new()
+                                    .with_outside_bg0(true)
+                                    .with_outside_bg1(true)
+                                    .with_outside_bg2(true)
+                                    .with_outside_bg3(true)
+                                    .with_outside_color_special(true)
+                                    .with_obj_win_bg0(true)
+                                    .with_obj_win_bg1(true)
+                                    .with_obj_win_bg2(false)
+                                    .with_obj_win_bg3(true)
+                                    .with_obj_win_color_special(true)
+                                );
+                            } else {
+                                gba::io::window::WINOUT.write(OutsideWindowSetting::new()
+                                    .with_outside_bg0(true)
+                                    .with_outside_bg1(true)
+                                    .with_outside_bg2(true)
+                                    .with_outside_bg3(true)
+                                    .with_outside_color_special(true)
+                                    .with_obj_win_bg0(true)
+                                    .with_obj_win_bg1(false)
+                                    .with_obj_win_bg2(true)
+                                    .with_obj_win_bg3(true)
+                                    .with_obj_win_color_special(true)
+                                );
+                            }
+                            BLDALPHA.write(
+                                AlphaBlendingSetting::new()
+                                    .with_eva_coefficient(16 - (alpha & 15))
+                                    .with_evb_coefficient(alpha & 15),
+                            );
+                        }
+                    }
                 }
-                BLDALPHA.write(
-                    AlphaBlendingSetting::new()
-                        .with_eva_coefficient(16 - (alpha >> 1))
-                        .with_evb_coefficient(alpha >> 1),
-                );
             }
         }
     }

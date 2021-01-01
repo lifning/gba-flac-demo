@@ -28,9 +28,7 @@ pub enum Button {
     B,
 }
 
-pub struct Hud {
-    odd_frame: bool,
-}
+pub struct Hud {}
 
 impl Hud {
     pub fn new() -> Self {
@@ -47,9 +45,11 @@ impl Hud {
         renderer.set_normal_colors_bg(240, &UI_PAL);
         renderer.load_bg_tiles(HUD_CHARBLOCK_ID, &UI_IMG);
 
-        Hud {
-            odd_frame: false,
-        }
+        Hud {}
+    }
+
+    fn odd_frame(&self) -> bool {
+        unsafe { Driver::instance_mut().video() }.frame_counter & 1 != 0
     }
 
     fn write_entry(&self, row: isize, col: isize, entry: TSE) {
@@ -60,9 +60,9 @@ impl Hud {
     fn write_entry_alternating(&self, row: isize, col: isize, entry: TSE) {
         // hack
         let alternation = if col > 15 {
-            !self.odd_frame
+            !self.odd_frame()
         } else {
-            self.odd_frame
+            self.odd_frame()
         } as u16;
         self.write_entry(row, col, TextScreenblockEntry(entry.0 + alternation))
     }
@@ -90,7 +90,6 @@ impl Hud {
     }
 
     pub fn draw_borders(&mut self, with_textbox: bool) {
-        self.odd_frame = !self.odd_frame;
         for row in 0..20 {
             self.write_entry_alternating(row, HUD_LEFT_COL, tiles::BG_LEFT_EDGE_1);
             self.write_entry_alternating(row, HUD_RIGHT_COL, tiles::BG_RIGHT_EDGE_1);

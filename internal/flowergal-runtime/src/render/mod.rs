@@ -35,12 +35,16 @@ use flowergal_proj_config::resources::*;
 
 use crate::timers::GbaTimer;
 use crate::render::palette::{NO_EFFECT, VCOUNT_SEQUENCE, VCOUNT_SEQUENCE_LEN, NO_COLORS, TEXTBOX_VCOUNTS};
+use crate::memory::MemoryOps;
 use core::ops::Range;
+use gba::io::dma::DMA3;
 
 #[derive(PartialEq)]
 pub enum Platform {
     Hardware,
     MGBA,
+    VBA,
+    NoCash,
 }
 
 pub struct GbaRenderer {
@@ -58,7 +62,7 @@ pub struct GbaRenderer {
     dispstat: DisplayStatusSetting,
     showing_textbox: bool,
     showing_effect: bool,
-    frame_counter: u32,
+    pub frame_counter: u32,
     vcount_index: usize,
     perf_log: [u32; VCOUNT_SEQUENCE_LEN],
     pub platform: Platform,
@@ -103,70 +107,103 @@ impl GbaRenderer {
         }
     }
 
-    pub fn initialize(&mut self) {
+    fn detect_platform() -> Platform {
         if let Some(_) = gba::mgba::MGBADebug::new() {
-            self.platform = Platform::MGBA;
+            return Platform::MGBA;
         }
 
-        // FIXME: crashes when we use ObjectSize::Three for some reason?
-        if self.platform != Platform::MGBA {
-            gba::io::window::WINOUT.write(OutsideWindowSetting::new()
-                .with_outside_bg0(true)
-                .with_outside_bg1(true)
-                .with_outside_bg2(true)
-                .with_outside_bg3(true)
-                .with_outside_color_special(true)
-                .with_obj_win_bg0(true)
-                .with_obj_win_bg1(true)
-                .with_obj_win_bg2(false)
-                .with_obj_win_bg3(true)
-                .with_obj_win_color_special(true)
-            );
-
-            let sprite_chars = unsafe {
-                let ptr = CHAR_BASE_BLOCKS.get(4).unwrap().to_usize() as *mut Tile4bpp;
-                core::slice::from_raw_parts_mut(ptr, 0x4000 / core::mem::size_of::<Tile4bpp>())
-            };
-            for char in sprite_chars {
-                char.0 = [
-                    0x10101010,
-                    0x01010101,
-                    0x10101010,
-                    0x01010101,
-                    0x10101010,
-                    0x01010101,
-                    0x10101010,
-                    0x01010101,
-                ];
+        unsafe {
+            let rom_src: &[u32] = &[0x900dc0de];
+            let bios_src: &[u32] = core::slice::from_raw_parts(core::ptr::null(), 1);
+            let mut dest: [u32; 2] = [!0, !0];
+            DMA3::copy_slice_to_address(rom_src, dest.as_mut_ptr() as usize);
+            DMA3::copy_slice_to_address(bios_src, dest.as_mut_ptr().add(1) as usize);
+            if dest[1] != 0x900dc0de {
+                return Platform::VBA;
             }
-            PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff));
-            self.update_sprite_attributes();
         }
+
+        // FIXME: detect No$GBA debugger? imperfect, can be disabled, detection doesn't work yet
+        unsafe {
+            let nocash_id = core::slice::from_raw_parts(0x4fffa00 as *const u8, 16);
+            if nocash_id[2] == '$' as u8 {
+                (0x4fffa10 as *mut *const u8).write_volatile("hello".as_ptr());
+                return Platform::NoCash;
+            }
+        }
+
+        Platform::Hardware
+    }
+
+    pub fn initialize(&mut self) {
+        self.platform = Self::detect_platform();
+
+        match self.platform {
+            // mGBA crashes with "Jumped to invalid address: E1A0E00E". TODO: bug report?
+            Platform::MGBA => { /* no workaround yet, just don't do it */ }
+            _ => {
+                gba::io::window::WINOUT.write(OutsideWindowSetting::new()
+                    .with_outside_bg0(true)
+                    .with_outside_bg1(true)
+                    .with_outside_bg2(true)
+                    .with_outside_bg3(true)
+                    .with_outside_color_special(true)
+                    .with_obj_win_bg0(true)
+                    .with_obj_win_bg1(true)
+                    .with_obj_win_bg2(false)
+                    .with_obj_win_bg3(true)
+                    .with_obj_win_color_special(true)
+                );
+
+                let sprite_chars = unsafe {
+                    let ptr = CHAR_BASE_BLOCKS.get(4).unwrap().to_usize() as *mut Tile4bpp;
+                    core::slice::from_raw_parts_mut(ptr, 0x4000 / core::mem::size_of::<Tile4bpp>())
+                };
+                for char in sprite_chars {
+                    char.0 = [
+                        0x10101010,
+                        0x01010101,
+                        0x10101010,
+                        0x01010101,
+                        0x10101010,
+                        0x01010101,
+                        0x10101010,
+                        0x01010101,
+                    ];
+                }
+                PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff))
+            }
+        }
+        self.update_sprite_attributes();
     }
 
     fn update_sprite_attributes(&mut self) {
-        for x in 0..=2 {
-            for y in 0..=2 {
-                let shape = match y {
-                    2 => ObjectShape::Horizontal,
-                    _ => ObjectShape::Square,
-                };
-                let slot = (y * 3 + x) as usize;
-                gba::oam::write_obj_attributes(slot, ObjectAttributes {
-                    attr0: OBJAttr0::new()
-                        .with_row_coordinate(64 * y)
-                        .with_obj_rendering(ObjectRender::Normal)
-                        .with_obj_mode(ObjectMode::OBJWindow)
-                        .with_obj_shape(shape),
-                    attr1: OBJAttr1::new()
-                        .with_col_coordinate(64 * x + 24)
-                        .with_hflip(self.even_odd_frame())
-                        .with_obj_size(ObjectSize::Three),
-                    attr2: OBJAttr2::new()
-                        .with_tile_id(0)
-                        .with_priority(0)
-                        .with_palbank(0),
-                });
+        match self.platform {
+            // mGBA crashes with "Jumped to invalid address: E1A0E00E". TODO: bug report?
+            Platform::MGBA => { /* no workaround yet, just don't do it */ }
+            _ => for x in 0..=2 {
+                for y in 0..=2 {
+                    let shape = match y {
+                        2 => ObjectShape::Horizontal,
+                        _ => ObjectShape::Square,
+                    };
+                    let slot = (y * 3 + x) as usize;
+                    gba::oam::write_obj_attributes(slot, ObjectAttributes {
+                        attr0: OBJAttr0::new()
+                            .with_row_coordinate(64 * y)
+                            .with_obj_rendering(ObjectRender::Normal)
+                            .with_obj_mode(ObjectMode::OBJWindow)
+                            .with_obj_shape(shape),
+                        attr1: OBJAttr1::new()
+                            .with_col_coordinate(64 * x + 24)
+                            .with_hflip(self.even_odd_frame())
+                            .with_obj_size(ObjectSize::Three),
+                        attr2: OBJAttr2::new()
+                            .with_tile_id(0)
+                            .with_priority(0)
+                            .with_palbank(0),
+                    });
+                }
             }
         }
     }
@@ -189,9 +226,10 @@ impl GbaRenderer {
         // TODO: hit every other vcount and only set up timer1 if we're supposed to do a thing?
         // fudging the numbers a bit on this 750, but i'm assuming there'll be ~50 cycles overhead
         let cycles = match self.platform {
-            Platform::Hardware => 750,
             // HACK: workaround for https://github.com/mgba-emu/mgba/issues/1996
-            Platform::MGBA => 50,
+            // start copying much sooner so it gets done *before* the next hdraw starts.
+            Platform::MGBA | Platform::VBA => 50,
+            _ => 750,
         };
         GbaTimer::setup_timer1_irq(cycles);
 
@@ -219,17 +257,6 @@ impl GbaRenderer {
         } else {
             NO_COLORS
         };
-
-        // TODO: screen wiggly effects
-
-        /*
-        // avoid flickering of bottom (sometimes irq firing on adjacent scanlines)
-        if !(self.showing_textbox && vcount > TEXTBOX_Y_START && vcount <= TEXTBOX_Y_END) {
-            while !DISPSTAT.read().hblank_flag() {
-                // busy wait until it's safe
-            }
-        }
-         */
     }
 
     #[link_section = ".iwram"]
@@ -314,26 +341,5 @@ impl GbaRenderer {
         unsafe {
             gba::bios::lz77_uncomp_16bit(data.as_ptr(), dest_addr as *mut u16);
         }
-    }
-
-    pub fn set_mosaic_amount(&self, mosaic_amount: u16) {
-        MOSAIC.write(
-            MosaicSetting::new()
-                .with_bg_horizontal_inc(mosaic_amount)
-                .with_bg_vertical_inc(mosaic_amount),
-        );
-    }
-}
-
-// in case we dynamic-draw tile pixels at runtime to change one
-pub fn set_bg_tile_4bpp(charblock: u16, index: usize, tile: Tile4bpp) {
-    assert!(charblock < 4);
-    assert!(index < 512);
-    unsafe {
-        CHAR_BASE_BLOCKS
-            .index(charblock as usize)
-            .cast::<Tile4bpp>()
-            .offset(index as isize)
-            .write(tile)
     }
 }
