@@ -1,10 +1,11 @@
 GBA FLAC Demo
 ----
-[![Video preview](https://github.com/lifning/gba-flac-demo/releases/download/v0.1.0/suzanne_ve.gba_preview.jpg)](https://github.com/lifning/gba-flac-demo/releases/download/v0.1.0/suzanne_ve.gba_preview.mp4)
+
+[![Screenshot](https://github.com/lifning/gba-flac-demo/raw/readme-assets/suzanne_ve.gba_preview.jpg)<br>Video preview](https://github.com/lifning/gba-flac-demo/raw/readme-assets/suzanne_ve.gba_preview.mp4)
 
 ## Development setup
 
-NOTE: You may have to wait for https://github.com/rust-lang/rust/pull/79863 to get into nightly, or else you'll get multiply-defined symbol errors at link time for __aeabi_memcpy and friends.
+NOTE: You may have to wait for https://github.com/rust-lang/rust/pull/79863 to get into nightly, or else you'll get multiply-defined symbol errors at link time for `__aeabi_memcpy` and friends.
 
 Either clone this repo with `git clone --recurse-submodules` or use `git submodule update --init --recursive` to get all the dependencies.
 
