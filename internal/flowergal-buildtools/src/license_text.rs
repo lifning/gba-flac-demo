@@ -20,7 +20,7 @@ use build_const::ConstWriter;
 const LICENSE_PREFERENCES: &[&str] = &["0BSD", "Unlicense", "MIT", "BSD-3-Clause", "Apache-2.0"];
 const NO_INCLUSION_OBLIGATIONS: &[&str] = &["0BSD", "Unlicense"];
 
-const WRAP_WIDTH: usize = 20;
+const WRAP_WIDTH: usize = 255; // length of mGBA debugString minus \0 terminator
 
 /*
 enum TextResource {
