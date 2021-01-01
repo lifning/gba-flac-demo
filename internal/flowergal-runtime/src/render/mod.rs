@@ -118,7 +118,7 @@ impl GbaRenderer {
             let mut dest: [u32; 2] = [!0, !0];
             DMA3::copy_slice_to_address(rom_src, dest.as_mut_ptr() as usize);
             DMA3::copy_slice_to_address(bios_src, dest.as_mut_ptr().add(1) as usize);
-            if dest[1] != 0x900dc0de {
+            if dest[1] == 0 {
                 return Platform::VBA;
             }
         }

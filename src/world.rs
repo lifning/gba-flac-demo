@@ -198,7 +198,7 @@ impl World {
             .with_obj(true)
             .with_win0(false)
             .with_win1(false)
-            .with_obj_window(true);
+            .with_obj_window(renderer.platform != Platform::MGBA);
 
         // making up for alignment in screenblock copying.
         BG1HOFS.write(BG_HOFS_BASE);
