@@ -31,3 +31,5 @@ Thanks to Lokathor & other contributors to rust-console/gba.
 Thanks to Nayuki for the accessible example of FLAC decoding.
 
 Thanks to Leonarth for the VBA-detection trick.
+
+Thanks to endrift for mGBA, without which development would be a huge pain.

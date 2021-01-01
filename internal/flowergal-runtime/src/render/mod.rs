@@ -138,74 +138,63 @@ impl GbaRenderer {
     pub fn initialize(&mut self) {
         self.platform = Self::detect_platform();
 
-        match self.platform {
-            // mGBA-Qt pre-0.9 crashes with "Jumped to invalid address: E1A0E00E"?
-            // TODO: bug report
-            Platform::MGBA => { /* no workaround yet, just don't do it */ }
-            _ => {
-                gba::io::window::WINOUT.write(OutsideWindowSetting::new()
-                    .with_outside_bg0(true)
-                    .with_outside_bg1(true)
-                    .with_outside_bg2(true)
-                    .with_outside_bg3(true)
-                    .with_outside_color_special(true)
-                    .with_obj_win_bg0(true)
-                    .with_obj_win_bg1(true)
-                    .with_obj_win_bg2(false)
-                    .with_obj_win_bg3(true)
-                    .with_obj_win_color_special(true)
-                );
+        gba::io::window::WINOUT.write(OutsideWindowSetting::new()
+            .with_outside_bg0(true)
+            .with_outside_bg1(true)
+            .with_outside_bg2(true)
+            .with_outside_bg3(true)
+            .with_outside_color_special(true)
+            .with_obj_win_bg0(true)
+            .with_obj_win_bg1(true)
+            .with_obj_win_bg2(false)
+            .with_obj_win_bg3(true)
+            .with_obj_win_color_special(true)
+        );
 
-                let sprite_chars = unsafe {
-                    let ptr = CHAR_BASE_BLOCKS.get(4).unwrap().to_usize() as *mut Tile4bpp;
-                    core::slice::from_raw_parts_mut(ptr, 0x4000 / core::mem::size_of::<Tile4bpp>())
-                };
-                for char in sprite_chars {
-                    char.0 = [
-                        0x10101010,
-                        0x01010101,
-                        0x10101010,
-                        0x01010101,
-                        0x10101010,
-                        0x01010101,
-                        0x10101010,
-                        0x01010101,
-                    ];
-                }
-                PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff))
-            }
+        let sprite_chars = unsafe {
+            let ptr = CHAR_BASE_BLOCKS.get(4).unwrap().to_usize() as *mut Tile4bpp;
+            core::slice::from_raw_parts_mut(ptr, 0x4000 / core::mem::size_of::<Tile4bpp>())
+        };
+        for char in sprite_chars {
+            char.0 = [
+                0x10101010,
+                0x01010101,
+                0x10101010,
+                0x01010101,
+                0x10101010,
+                0x01010101,
+                0x10101010,
+                0x01010101,
+            ];
         }
+        PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff));
+
         self.update_sprite_attributes();
     }
 
     fn update_sprite_attributes(&mut self) {
-        match self.platform {
-            // mGBA-Qt pre-0.9 crashes with "Jumped to invalid address: E1A0E00E"?
-            // TODO: bug report
-            Platform::MGBA => { /* no workaround yet, just don't do it */ }
-            _ => for x in 0..=2 {
-                for y in 0..=2 {
-                    let shape = match y {
-                        2 => ObjectShape::Horizontal,
-                        _ => ObjectShape::Square,
-                    };
-                    let slot = (y * 3 + x) as usize;
-                    gba::oam::write_obj_attributes(slot, ObjectAttributes {
-                        attr0: OBJAttr0::new()
-                            .with_row_coordinate(64 * y)
-                            .with_obj_rendering(ObjectRender::Normal)
-                            .with_obj_mode(ObjectMode::OBJWindow)
-                            .with_obj_shape(shape),
-                        attr1: OBJAttr1::new()
-                            .with_col_coordinate(64 * x + 24)
-                            .with_hflip(self.even_odd_frame())
-                            .with_obj_size(ObjectSize::Three),
-                        attr2: OBJAttr2::new()
-                            .with_tile_id(0)
-                            .with_priority(0)
-                            .with_palbank(0),
-                    });
-                }
+        for x in 0..=2 {
+            for y in 0..=2 {
+                let shape = match y {
+                    2 => ObjectShape::Horizontal,
+                    _ => ObjectShape::Square,
+                };
+                let slot = (y * 3 + x) as usize;
+                gba::oam::write_obj_attributes(slot, ObjectAttributes {
+                    attr0: OBJAttr0::new()
+                        .with_row_coordinate(64 * y)
+                        .with_obj_rendering(ObjectRender::Normal)
+                        .with_obj_mode(ObjectMode::OBJWindow)
+                        .with_obj_shape(shape),
+                    attr1: OBJAttr1::new()
+                        .with_col_coordinate(64 * x + 24)
+                        .with_hflip(self.even_odd_frame())
+                        .with_obj_size(ObjectSize::Three),
+                    attr2: OBJAttr2::new()
+                        .with_tile_id(0)
+                        .with_priority(0)
+                        .with_palbank(0),
+                });
             }
         }
     }
