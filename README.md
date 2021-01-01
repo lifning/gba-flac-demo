@@ -1,5 +1,6 @@
 GBA FLAC Demo
 ----
+[![Video preview](https://github.com/lifning/gba-flac-demo/releases/download/v0.1.0/suzanne_ve.gba_preview.jpg)](https://github.com/lifning/gba-flac-demo/releases/download/v0.1.0/suzanne_ve.gba_preview.mp4)
 
 ## Development setup
 
