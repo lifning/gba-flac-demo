@@ -302,7 +302,7 @@ impl MemoryOps for DMA3 {
                 .with_start_time(DMAStartTiming::Immediate)
                 .with_enabled(true),
         );
-        asm!("NOP; NOP", options(nomem, nostack));
+        asm!("NOP; NOP", options(nostack));
     }
 
     unsafe fn fill_slice_32(dest: &mut [u32], value: u32) {
