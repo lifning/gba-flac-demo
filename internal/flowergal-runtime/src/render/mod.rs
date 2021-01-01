@@ -139,7 +139,8 @@ impl GbaRenderer {
         self.platform = Self::detect_platform();
 
         match self.platform {
-            // mGBA crashes with "Jumped to invalid address: E1A0E00E". TODO: bug report?
+            // mGBA-Qt pre-0.9 crashes with "Jumped to invalid address: E1A0E00E"?
+            // TODO: bug report
             Platform::MGBA => { /* no workaround yet, just don't do it */ }
             _ => {
                 gba::io::window::WINOUT.write(OutsideWindowSetting::new()
@@ -179,7 +180,8 @@ impl GbaRenderer {
 
     fn update_sprite_attributes(&mut self) {
         match self.platform {
-            // mGBA crashes with "Jumped to invalid address: E1A0E00E". TODO: bug report?
+            // mGBA-Qt pre-0.9 crashes with "Jumped to invalid address: E1A0E00E"?
+            // TODO: bug report
             Platform::MGBA => { /* no workaround yet, just don't do it */ }
             _ => for x in 0..=2 {
                 for y in 0..=2 {
