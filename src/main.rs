@@ -3,7 +3,6 @@
 #![feature(asm)]
 #![feature(panic_info_message)]
 #![feature(const_fn_transmute)]
-#![feature(slice_fill)]
 #![feature(const_in_array_repeat_expressions)]
 #![feature(const_fn)]
 

@@ -9,7 +9,6 @@
 #![feature(unchecked_math)]
 #![feature(fixed_size_array)]
 #![feature(array_windows)]
-#![feature(slice_fill)]
 #![feature(slice_fill_with)]
 #![feature(const_fn_transmute)]
 #![feature(const_mut_refs)]
