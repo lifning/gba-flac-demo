@@ -25,6 +25,8 @@ rustup toolchain install nightly
 rustup component add --toolchain nightly rust-src
 ```
 
+If you're on Windows, you'll probably want to try doing all this in WSL or LxSS or whatever they're calling it these days. [It might work!](https://ld-linux.so/)
+
 ## Build and run
 ```sh
 cargo run --release
