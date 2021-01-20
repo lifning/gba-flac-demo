@@ -15,8 +15,6 @@ If you run this in something other than a hardware GBA, DS, or 3DS+open_gba_firm
 
 ## Development setup
 
-NOTE: You may have to wait for https://github.com/rust-lang/rust/pull/79863 to get into nightly, or else you'll get multiply-defined symbol errors at link time for `__aeabi_memcpy` and friends.
-
 Either clone this repo with `git clone --recurse-submodules` or use `git submodule update --init --recursive` to get all the dependencies.
 
 Install `youtube-dl`, `clang++`, `ffmpeg`, `mgba-qt`, `SDL2-devel`, and `arm-none-eabi-{as,gcc,ld,objcopy}` wherever Unix packages are sold.
