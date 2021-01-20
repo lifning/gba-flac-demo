@@ -17,7 +17,7 @@ If you run this in something other than a hardware GBA, DS, or 3DS+open_gba_firm
 
 Either clone this repo with `git clone --recurse-submodules` or use `git submodule update --init --recursive` to get all the dependencies.
 
-Install `youtube-dl`, `clang++`, `ffmpeg`, `mgba-qt`, `SDL2-devel`, and `arm-none-eabi-{as,gcc,ld,objcopy}` wherever Unix packages are sold.
+Install `youtube-dl`, `clang++`, `ffmpeg`, `mgba-qt`, `SDL2-devel`, `SDL2_image-devel`, and `arm-none-eabi-{as,gcc,ld,objcopy}` wherever Unix packages are sold.
 
 You'll need at least the nightly-2021-01-15 (or so) Rust toolchain.
 ```sh
