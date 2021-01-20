@@ -33,6 +33,8 @@ cargo run --release
 
 (Or just for non-development-oriented emulators)
 
+You'll need `gbafix` from either cargo or devkitPro.
+
 ```sh
 make
 ```
