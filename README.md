@@ -40,6 +40,8 @@ You'll need `gbafix` from either cargo (`cargo install gbafix`) or devkitPro.
 make
 ```
 
+You'll find the built ROM at `target/flac-demo-release.gba`.
+
 ## Acknowledgements
 Thanks to Lokathor & other contributors to rust-console/gba.
 
