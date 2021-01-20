@@ -19,6 +19,7 @@ Either clone this repo with `git clone --recurse-submodules` or use `git submodu
 
 Install `youtube-dl`, `clang++`, `ffmpeg`, `mgba-qt`, `SDL2-devel`, and `arm-none-eabi-{as,gcc,ld,objcopy}` wherever Unix packages are sold.
 
+You'll need at least the nightly-2021-01-15 (or so) Rust toolchain.
 ```sh
 rustup toolchain install nightly
 rustup component add --toolchain nightly rust-src
