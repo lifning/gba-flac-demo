@@ -66,7 +66,7 @@ fn read_from_files(included_crate_licenses: BTreeMap<String, BTreeMap<&str, Path
         buf = buf.replace("©", "(c)");
         // FIXME: put some unicode chars in font, special-case the tile IDs here when we do
         buf = buf.replace("ń", "n");
-        buf = buf.replace("ł", "t");
+        buf = buf.replace("ł", "l");
         let dirty_newline = Regex::new(r"(\r\n|\n\t|\n )")?;
         while dirty_newline.is_match(&buf) {
             buf = dirty_newline.replace_all(&buf, "\n").to_string();
