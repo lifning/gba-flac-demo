@@ -11,6 +11,7 @@ gba = { path = "../../external/gba" }
 gba-compression = { path = "../../external/gba-compression" }
 build_const = { version = "0.2" }
 cargo-about = "0.2.3"
+itertools = "0.10"
 spdx = "0.3.4" # must match cargo-about's version
 textwrap = { version = "0.13", features = ["hyphenation"] }
 hyphenation = { version = "0.8",  features = ["embed_en-us"] } # must match textwrap's version

@@ -3,6 +3,7 @@
 #![feature(seek_convenience)]
 #![feature(generators)]
 #![feature(drain_filter)]
+#![feature(command_access)]
 
 #![allow(clippy::comparison_chain)]
 #![allow(clippy::new_without_default)]
