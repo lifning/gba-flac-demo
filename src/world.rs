@@ -409,7 +409,7 @@ impl World {
 
                 let alpha = (32 - ((self.frame_count >> 3) & 63)).abs() as u16;
                 let renderer = unsafe { Driver::instance_mut().video() };
-                // HACK: don't alternate meshes
+                // HACK: don't alternate meshes on frames where we're swapping dominant layers
                 if self.frame_count & 511 == 256+127 {
                     renderer.frame_counter -= 1;
                 }

@@ -157,14 +157,14 @@ impl GbaRenderer {
         };
         for char in sprite_chars {
             char.0 = [
-                0x10101010,
-                0x01010101,
-                0x10101010,
-                0x01010101,
-                0x10101010,
-                0x01010101,
-                0x10101010,
-                0x01010101,
+                0x11111111,
+                0x00000000,
+                0x11111111,
+                0x00000000,
+                0x11111111,
+                0x00000000,
+                0x11111111,
+                0x00000000,
             ];
         }
         PALRAM_OBJ.get(1).unwrap().write(gba::Color(0xffff));
@@ -188,7 +188,7 @@ impl GbaRenderer {
                         .with_obj_shape(shape),
                     attr1: OBJAttr1::new()
                         .with_col_coordinate(64 * x + 24)
-                        .with_hflip(self.even_odd_frame())
+                        .with_vflip(self.even_odd_frame())
                         .with_obj_size(ObjectSize::Three),
                     attr2: OBJAttr2::new()
                         .with_tile_id(0)
