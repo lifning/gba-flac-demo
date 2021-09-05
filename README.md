@@ -13,6 +13,10 @@ If you run this in something other than a hardware GBA, DS, or 3DS+open_gba_firm
 - No$GBA and NanoboyAdvance do not seem to have an interframe blending feature, but otherwise render correctly.
 - While normally an accurate emulator, I currently can't recommend higan for this demo in particular, as it struggles with rendering the scanline effects properly (without flickering), and I don't yet have a way of detecting when the demo is running in higan to enable workarounds. But for completeness / in case the problem gets fixed after this writing, it's `Settings`|`Video...`|:ballot_box_with_check:`Interframe Blending`
 
+## Caveat for developers
+
+The quality of a lot of the code here isn't what I'd call production-grade, or even idiomatic Rust; this was primarily a demo thrown together to demonstrate to myself that Rust was viable at all for targetting GBA hardware with a nontrivial workload (that is, more than just [drawing three pixels to a framebuffer](https://www.coranac.com/tonc/text/first.htm)). There were already growing pains in the codebase by the time I finished this (particularly the mutable static global used for interfacing with the hardware in ways that completely neglect a lot of what Rust brings to the table in terms of Fearless Concurrency:tm:)
+
 ## Development setup
 
 Either clone this repo with `git clone --recurse-submodules` or use `git submodule update --init --recursive` to get all the dependencies.
